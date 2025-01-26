@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alt Text Results</title>
+    <style>
+        .image-card { border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        img { max-width: 300px; height: auto; margin: 1rem 0; border: 1px solid #eee; }
+        .alt-text { background: #f8f9fa; padding: 1rem; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Generated Alt Texts</h1>
+    <a href="/">← Upload another PDF</a>
+    
+    {% if images %}
+        {% for img in images %}
+        <div class="image-card">
+            <h3>Page {{ img.page }} - Image {{ loop.index }}</h3>
+            <img src="{{ url_for('static', filename=img.filename) }}">
+            <div class="alt-text">
+                <strong>Alt Text:</strong>
+                <p>{{ img.alt_text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No images found in the PDF</p>
+    {% endif %}
+</body>
+</html>
