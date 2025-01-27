@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alt-Text Results</title>
+    <style>
+        body { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; font-family: Arial, sans-serif; }
+        .result-card { border: 1px solid #ddd; padding: 1.5rem; margin: 2rem 0; border-radius: 8px; }
+        .preview-img { max-width: 400px; height: auto; border: 1px solid #eee; margin: 1rem 0; }
+        .alt-text { background: #f8f9fa; padding: 1rem; border-radius: 4px; line-height: 1.6; }
+        .page-info { color: #666; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Generated Alt Texts</h1>
+    <a href="/">&larr; Upload another paper</a>
+
+    {% if results %}
+        {% for result in results %}
+        <div class="result-card">
+            <div class="page-info">
+                Page {{ result.page }} - Figure {{ result.position }}
+            </div>
+            <img class="preview-img" src="{{ result.preview }}" 
+                 alt="Preview of figure {{ result.position }} from page {{ result.page }}">
+            <div class="alt-text">
+                {{ result.alt_text }}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No images found in the uploaded PDF</p>
+    {% endif %}
+</body>
+</html>
