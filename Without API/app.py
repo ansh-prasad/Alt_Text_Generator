@@ -22,7 +22,7 @@ try:
     )
 except Exception as e:
     print(f"Failed to load model: {str(e)}")
-    exit(1)
+    exit(1) 
 
 def generate_alt_text(image_path):
     """Generate alt text using BLIP model with error handling"""
@@ -115,3 +115,6 @@ def index():
 if __name__ == '__main__':
     os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'static'), exist_ok=True)
     app.run(host='0.0.0.0', port=5000, debug=True)  # This line MUST be indented
+
+
+# flask run --host=0.0.0.0 --port=5000
