@@ -1,0 +1,4 @@
+{% for img, alt_text in image_text_pairs %}
+<img src="{{ img }}" alt="{{ alt_text }}" />
+<p>{{ alt_text }}</p>
+{% endfor %}
