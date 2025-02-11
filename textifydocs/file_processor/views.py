@@ -56,3 +56,4 @@ def upload_file(request):
     extracted_images = ExtractedImage.objects.all()
 
     return render(request, "file_processor/upload.html", {"extracted_images": extracted_images})
+   
