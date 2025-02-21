@@ -12,9 +12,9 @@ import json
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
-app.config['EXTRACTED_FOLDER'] = '/tmp/extracted_images'
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['EXTRACTED_FOLDER'] = 'static/extracted_images'
 
 API_KEYS = [
     os.getenv("GEMINI_API_KEY1"),
@@ -24,11 +24,12 @@ API_KEYS = [
 api_key_iterator = cycle(API_KEYS)
 
 if not all(API_KEYS):
-    raise ValueError("All three GEMINI_API_KEYs must be provided in environment variables")
+    raise ValueError("All three GEMINI_API_KEYs must be provided in .env file")
 
-# Ensure tmp directories exist
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['EXTRACTED_FOLDER'], exist_ok=True)
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+if not os.path.exists(app.config['EXTRACTED_FOLDER']):
+    os.makedirs(app.config['EXTRACTED_FOLDER'])
 
 class GeminiAPIClient:
     def __init__(self):
@@ -128,8 +129,6 @@ def process_pdf():
 
 @app.route('/results')
 def results():
+    # This route is now just a placeholder for the results page
     return render_template('results.html')
 
-# Vercel handler
-def handler(request):
-    return app(request.environ, request.start_response)
