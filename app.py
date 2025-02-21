@@ -12,7 +12,7 @@ import json
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['EXTRACTED_FOLDER'] = 'static/extracted_images'
 
@@ -129,7 +129,6 @@ def process_pdf():
 
 @app.route('/results')
 def results():
-    # This route is now just a placeholder for the results page
     return render_template('results.html')
 
 if __name__ == '__main__':
