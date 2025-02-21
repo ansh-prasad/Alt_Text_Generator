@@ -1,26 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Upload PDF</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload PDF - Image Extractor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      body {
+        background: linear-gradient(135deg, #e0eafc, #cfdef3);
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+      }
+      .upload-container {
+        max-width: 550px;
+        margin: 0 auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+      .upload-container:hover {
+        transform: translateY(-5px);
+      }
+      h1 {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      .text-muted {
+        color: #7f8c8d !important;
+      }
+      .custom-file-upload {
+        padding: 12px 25px;
+        background: linear-gradient(90deg, #3498db, #2980b9);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+      }
+      .custom-file-upload:hover {
+        background: linear-gradient(90deg, #2980b9, #1f618d);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+      }
+      input[type="file"] {
+        display: none;
+      }
+      #file-chosen {
+        transition: color 0.3s ease;
+      }
+      .btn-primary {
+        background: linear-gradient(90deg, #3498db, #2980b9);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(90deg, #2980b9, #1f618d);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+      }
+      .btn-primary:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+      }
+    </style>
   </head>
-  <body class="bg-light">
-    <div class="container text-center mt-5">
-      <h1 class="mb-4">Upload a PDF File</h1>
-      <div class="card p-4 shadow">
-        <form action="/" method="post" enctype="multipart/form-data">
+  <body>
+    <div class="upload-container">
+      <h1 class="text-center mb-4">PDF Image Extractor</h1>
+      <p class="text-center text-muted mb-4">
+        Upload a PDF to extract images and generate descriptions
+      </p>
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-4 text-center">
+          <label for="pdf_file" class="custom-file-upload">
+            Choose PDF File
+          </label>
           <input
             type="file"
             name="pdf_file"
-            class="form-control mb-3"
-            required
+            id="pdf_file"
+            accept=".pdf"
+            onchange="this.form.submitBtn.disabled=false; document.getElementById('file-chosen').style.color='#2c3e50';"
           />
-          <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-      </div>
+          <span id="file-chosen" class="d-block mt-2 text-muted">No file chosen</span>
+        </div>
+        <div class="text-center">
+          <input
+            type="submit"
+            value="Extract Images"
+            class="btn btn-primary"
+            id="submitBtn"
+            disabled
+          />
+        </div>
+      </form>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const fileInput = document.getElementById("pdf_file");
+      const fileChosen = document.getElementById("file-chosen");
+      fileInput.addEventListener("change", function () {
+        fileChosen.textContent = this.files[0].name;
+      });
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   </body>
 </html>

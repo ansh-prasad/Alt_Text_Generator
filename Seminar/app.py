@@ -3,15 +3,48 @@ import hashlib
 import fitz  # PyMuPDF
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
+import google.generativeai as genai
+from PIL import Image
+import io
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure Gemini API using environment variable
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['EXTRACTED_FOLDER'] = 'static/extracted_images'
 
+# Initialize Gemini model with updated model name
+model = genai.GenerativeModel('gemini-1.5-flash')  # Updated to newer model
+
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 if not os.path.exists(app.config['EXTRACTED_FOLDER']):
     os.makedirs(app.config['EXTRACTED_FOLDER'])
+
+def generate_alt_text(image_path):
+    """Generate alt text for an image using Gemini API"""
+    try:
+        # Open and prepare image for Gemini
+        with open(image_path, 'rb') as img_file:
+            img = Image.open(img_file)
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format=img.format)
+            img_bytes = img_byte_arr.getvalue()
+        
+        # Generate alt text
+        response = model.generate_content([
+            "Provide a detailed description of this image for alt text purposes",
+            {"mime_type": f"image/{img.format.lower()}", "data": img_bytes}
+        ])
+        
+        return response.text
+    except Exception as e:
+        return f"Image description: Unable to generate alt text due to {str(e)}"
 
 def extract_images_from_pdf(pdf_path, output_folder):
     pdf_document = fitz.open(pdf_path)
@@ -39,7 +72,12 @@ def extract_images_from_pdf(pdf_path, output_folder):
             with open(output_file, "wb") as image_file:
                 image_file.write(image_bytes)
             
-            extracted_images.append(output_file)
+            # Generate alt text for this image
+            alt_text = generate_alt_text(output_file)
+            extracted_images.append({
+                'path': output_file,
+                'alt_text': alt_text
+            })
             image_count += 1
     
     pdf_document.close()
