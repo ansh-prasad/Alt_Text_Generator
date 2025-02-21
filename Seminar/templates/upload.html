@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Upload PDF - Image Extractor</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
       body {
         background: linear-gradient(135deg, #e0eafc, #cfdef3);
@@ -69,6 +66,18 @@
         background: #bdc3c7;
         cursor: not-allowed;
       }
+      .progress-container {
+        display: none;
+        margin-top: 20px;
+      }
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+      .error-message {
+        color: #dc3545;
+        display: none;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -77,7 +86,7 @@
       <p class="text-center text-muted mb-4">
         Upload a PDF to extract images and generate descriptions
       </p>
-      <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" id="uploadForm">
         <div class="mb-4 text-center">
           <label for="pdf_file" class="custom-file-upload">
             Choose PDF File
@@ -89,9 +98,7 @@
             accept=".pdf"
             onchange="this.form.submitBtn.disabled=false; document.getElementById('file-chosen').style.color='#2c3e50';"
           />
-          <span id="file-chosen" class="d-block mt-2 text-muted"
-            >No file chosen</span
-          >
+          <span id="file-chosen" class="d-block mt-2 text-muted">No file chosen</span>
         </div>
         <div class="text-center">
           <input
@@ -102,6 +109,21 @@
             disabled
           />
         </div>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress">
+            <div
+              class="progress-bar bg-info"
+              role="progressbar"
+              id="progressBar"
+              style="width: 0%"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            ></div>
+          </div>
+          <p class="text-center mt-2" id="progressText">Processing: 0%</p>
+          <p class="text-center error-message" id="errorMessage"></p>
+        </div>
       </form>
     </div>
 
@@ -109,13 +131,69 @@
     <script>
       const fileInput = document.getElementById("pdf_file");
       const fileChosen = document.getElementById("file-chosen");
+      const form = document.getElementById("uploadForm");
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const errorMessage = document.getElementById("errorMessage");
+
       fileInput.addEventListener("change", function () {
         fileChosen.textContent = this.files[0].name;
       });
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        progressContainer.style.display = "block";
+        errorMessage.style.display = "none";
+        document.getElementById("submitBtn").disabled = true;
+
+        const formData = new FormData(this);
+        const uploadResponse = await fetch("/", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!uploadResponse.ok) {
+          progressText.textContent = "Upload failed";
+          errorMessage.textContent = "Failed to upload file";
+          errorMessage.style.display = "block";
+          return;
+        }
+
+        const eventSource = new EventSource("/process");
+        
+        eventSource.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          
+          if (data.error) {
+            progressText.textContent = "Processing failed";
+            errorMessage.textContent = data.error;
+            errorMessage.style.display = "block";
+            eventSource.close();
+            return;
+          }
+
+          const progress = Math.round(data.progress);
+          progressBar.style.width = `${progress}%`;
+          progressBar.setAttribute("aria-valuenow", progress);
+          progressText.textContent = `Processing: ${progress}%`;
+
+          if (data.completed) {
+            eventSource.close();
+            const images = data.images;
+            localStorage.setItem("extractedImages", JSON.stringify(images));
+            window.location.href = "/results";
+          }
+        };
+
+        eventSource.onerror = function () {
+          eventSource.close();
+          progressText.textContent = "Connection lost";
+          errorMessage.textContent = "An error occurred during processing";
+          errorMessage.style.display = "block";
+        };
+      });
     </script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-  </body>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
 </html>

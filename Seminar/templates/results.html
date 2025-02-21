@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Extracted Images - Image Extractor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
       body {
         background: linear-gradient(135deg, #e0eafc, #cfdef3);
@@ -92,22 +95,9 @@
     <div class="results-container">
       <button onclick="history.back()" class="btn back-btn">Back</button>
       <h1 class="text-center mb-4">Extracted Images</h1>
-      <p class="text-center text-muted mb-5">
-        Found {{ images|length }} unique images
-      </p>
+      <p class="text-center text-muted mb-5" id="imageCount"></p>
 
-      {% for image in images %}
-      <div class="image-container">
-        <img
-          src="{{ url_for('static', filename=image.path.split('static/')[1]) }}"
-          alt="{{ image.alt_text }}"
-          class="result-image"
-        />
-        <p class="alt-text">
-          <strong>Description:</strong> {{ image.alt_text }}
-        </p>
-      </div>
-      {% endfor %}
+      <div id="imagesContainer"></div>
 
       <div class="btn-container">
         <a href="/" class="btn btn-primary">Upload Another PDF</a>
@@ -115,6 +105,42 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const images = JSON.parse(
+          localStorage.getItem("extractedImages") || "[]"
+        );
+        const imagesContainer = document.getElementById("imagesContainer");
+        const imageCount = document.getElementById("imageCount");
+
+        if (images.length === 0) {
+          imageCount.textContent = "No images found or processing failed";
+          return;
+        }
+
+        imageCount.textContent = `Found ${images.length} unique images`;
+
+        images.forEach((image) => {
+          const div = document.createElement("div");
+          div.className = "image-container";
+          div.innerHTML = `
+            <img src="${image.path.replace("static/", "/static/")}" alt="${
+            image.alt_text
+          }" class="result-image" />
+            <p class="alt-text"><strong>Description:</strong> ${
+              image.alt_text
+            }</p>
+          `;
+          imagesContainer.appendChild(div);
+        });
+
+        // Clear localStorage after rendering
+        localStorage.removeItem("extractedImages");
+      });
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
   </body>
 </html>
