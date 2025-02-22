@@ -1,8 +1,8 @@
-Flask==3.0.3
-PyMuPDF==1.24.9
-google-generativeai==0.8.2
-Pillow==10.4.0
-python-dotenv==1.0.1
-werkzeug==3.0.4
+Flask==2.3.3
+Werkzeug==2.3.7
+PyMuPDF==1.23.5
+Pillow==10.0.0
+google-generativeai==0.3.2
+python-dotenv==1.0.0
 
 # pip install -r requirements.txt
