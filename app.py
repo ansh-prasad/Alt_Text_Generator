@@ -26,10 +26,10 @@ api_key_iterator = cycle(API_KEYS)
 if not all(API_KEYS):
     raise ValueError("All three GEMINI_API_KEYs must be provided in .env file")
 
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-if not os.path.exists(app.config['EXTRACTED_FOLDER']):
-    os.makedirs(app.config['EXTRACTED_FOLDER'])
+# Create folders if they don't exist
+for folder in [app.config['UPLOAD_FOLDER'], app.config['EXTRACTED_FOLDER']]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 class GeminiAPIClient:
     def __init__(self):
@@ -56,8 +56,21 @@ def generate_alt_text(image_path, client):
     except Exception as e:
         return f"Image description: Unable to generate alt text due to {str(e)}"
 
+def cleanup_folder(folder):
+    """Remove all files in the specified folder"""
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
+
 def extract_images_from_pdf(pdf_path, output_folder):
     try:
+        # Clean up extracted images folder before processing new PDF
+        cleanup_folder(output_folder)
+        
         pdf_document = fitz.open(pdf_path)
         total_images = sum(len(page.get_images(full=True)) for page in pdf_document)
         image_count = 0
@@ -111,6 +124,9 @@ def upload_pdf():
         if pdf_file.filename == '':
             return redirect(request.url)
         
+        # Clean up uploads folder before saving new file
+        cleanup_folder(app.config['UPLOAD_FOLDER'])
+        
         filename = secure_filename(pdf_file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         pdf_file.save(file_path)
@@ -129,6 +145,7 @@ def process_pdf():
 
 @app.route('/results')
 def results():
-    # This route is now just a placeholder for the results page
     return render_template('results.html')
 
+if __name__ == '__main__':
+    app.run(debug=True)
