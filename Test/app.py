@@ -46,7 +46,14 @@ def generate_alt_text(image_path):
             image_data = image_file.read()
             image_base64 = b64encode(image_data).decode("utf-8")
         
-        prompt = "Generate alternative text (alt text) describing any figures, diagrams, or illustrations in this image. List each figure separately with 'Figure X:' followed by its description (e.g., 'Figure 1: An aerial view...'). If no figures are present, return 'No figures present in the image.'"
+        prompt = (
+    "Identify and describe only the figures that are actually depicted in the image, such as graphs, charts, diagrams, "
+    "illustrations, or photographs. Ignore any textual mentions of figures that are not visually present. "
+    "Do not describe tables, which are structured data presentations with rows and columns. "
+    "List each figure separately with 'Figure X:' followed by its description "
+    "(e.g., 'Figure 1: A line graph showing...'). If there are no figures visually present in the image, return "
+    "'No figures present in the image.'"
+)
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content([
             {"mime_type": "image/png", "data": image_base64},
